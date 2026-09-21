@@ -1,0 +1,3594 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>IT Программалоо</title>
+
+    <style>
+
+        :root {
+            --bg: #030712;
+            --bg2: #071120;
+            --panel: rgba(10, 22, 42, 0.72);
+            --panel2: rgba(12, 28, 52, 0.52);
+            --line: rgba(120, 220, 255, 0.18);
+
+            --cyan: #34e7ff;
+            --blue: #38a7ff;
+            --purple: #8a63ff;
+            --green: #53ffc2;
+            --yellow: #ffd95a;
+
+            --white: #ffffff;
+            --text: #eaf4ff;
+            --muted: #9dafc8;
+
+            --shadow:
+                0 30px 100px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                Inter,
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            overflow-x: hidden;
+        }
+
+        /* =========================================
+           CANVAS
+        ========================================= */
+
+        #networkCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        /* =========================================
+           BACKGROUND
+        ========================================= */
+
+        .pageBackground {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+
+            background:
+                radial-gradient(
+                    circle at 15% 20%,
+                    rgba(25, 140, 255, 0.18),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 85% 30%,
+                    rgba(130, 70, 255, 0.17),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 50% 90%,
+                    rgba(0, 255, 200, 0.09),
+                    transparent 28%
+                ),
+                linear-gradient(
+                    145deg,
+                    #020611,
+                    #061126 50%,
+                    #030712
+                );
+        }
+
+        .grid {
+            position: absolute;
+            inset: -40%;
+
+            background-image:
+                linear-gradient(
+                    rgba(90, 210, 255, 0.045) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(90, 210, 255, 0.045) 1px,
+                    transparent 1px
+                );
+
+            background-size: 65px 65px;
+
+            transform:
+                perspective(900px)
+                rotateX(68deg)
+                translateY(20%);
+
+            animation: gridMove 18s linear infinite;
+        }
+
+        @keyframes gridMove {
+            from {
+                transform:
+                    perspective(900px)
+                    rotateX(68deg)
+                    translateY(20%);
+            }
+
+            to {
+                transform:
+                    perspective(900px)
+                    rotateX(68deg)
+                    translateY(calc(20% + 65px));
+            }
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.42;
+        }
+
+        .orb.one {
+            width: 420px;
+            height: 420px;
+            background: #0077ff;
+            left: -160px;
+            top: 5%;
+            animation: orbOne 12s ease-in-out infinite alternate;
+        }
+
+        .orb.two {
+            width: 500px;
+            height: 500px;
+            background: #7141ff;
+            right: -180px;
+            top: 30%;
+            animation: orbTwo 14s ease-in-out infinite alternate;
+        }
+
+        .orb.three {
+            width: 330px;
+            height: 330px;
+            background: #00ffd0;
+            left: 40%;
+            bottom: -180px;
+            opacity: 0.18;
+            animation: orbThree 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes orbOne {
+            to {
+                transform: translate(220px, 100px);
+            }
+        }
+
+        @keyframes orbTwo {
+            to {
+                transform: translate(-180px, 130px);
+            }
+        }
+
+        @keyframes orbThree {
+            to {
+                transform: translate(100px, -140px);
+            }
+        }
+
+        /* =========================================
+           TOP BAR
+        ========================================= */
+
+        .topBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+
+            height: 86px;
+
+            padding: 0 42px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background:
+                linear-gradient(
+                    to bottom,
+                    rgba(3, 7, 18, 0.88),
+                    rgba(3, 7, 18, 0.35),
+                    transparent
+                );
+
+            backdrop-filter: blur(10px);
+
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+        }
+
+        .brandText strong {
+            display: block;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .brandText span {
+            display: block;
+            margin-top: 3px;
+            font-size: 12px;
+            color: var(--cyan);
+            letter-spacing: 1.6px;
+        }
+
+        .topActions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .topButton {
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.04);
+            color: white;
+
+            padding: 11px 17px;
+
+            border-radius: 999px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+            transition: 0.3s;
+        }
+
+        .topButton:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        /* MUSIC CONTROL */
+
+.musicButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.musicButton.musicOn {
+    color: var(--cyan);
+    border-color: rgba(52,231,255,0.32);
+    background: rgba(52,231,255,0.08);
+    box-shadow: 0 0 22px rgba(52,231,255,0.10);
+}
+
+.musicIcon {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    font-size: 15px;
+}
+
+        /* =========================================
+           RIGHT NAVIGATION
+        ========================================= */
+
+        .sideNav {
+            position: fixed;
+            right: 28px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+
+            z-index: 1000;
+        }
+
+        .navDot {
+            width: 10px;
+            height: 10px;
+
+            border-radius: 50%;
+
+            background: rgba(255,255,255,0.2);
+
+            border: none;
+
+            cursor: pointer;
+
+            transition: 0.35s;
+        }
+
+        .navDot.active {
+            background: var(--cyan);
+
+            box-shadow:
+                0 0 0 6px rgba(52,231,255,0.08),
+                0 0 24px rgba(52,231,255,0.7);
+
+            transform: scale(1.25);
+        }
+
+        /* =========================================
+           PROGRESS
+        ========================================= */
+
+        .progressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+
+            height: 3px;
+            width: 0;
+
+            z-index: 2000;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--cyan),
+                    var(--purple),
+                    var(--green)
+                );
+
+            box-shadow:
+                0 0 18px rgba(52,231,255,0.7);
+        }
+
+        /* =========================================
+           SECTIONS
+        ========================================= */
+
+        .section {
+            position: relative;
+
+            min-height: 100vh;
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+
+            scroll-snap-align: start;
+
+            padding:
+                110px
+                8vw
+                70px;
+
+            z-index: 2;
+
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1450px;
+            margin: 0 auto;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+
+            margin-bottom: 22px;
+
+            padding: 9px 15px;
+
+            border:
+                1px solid rgba(52,231,255,0.22);
+
+            border-radius: 999px;
+
+            background:
+                rgba(52,231,255,0.06);
+
+            color: var(--cyan);
+
+            font-size: 13px;
+            letter-spacing: 2.3px;
+
+            text-transform: uppercase;
+        }
+
+        .eyebrowDot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+
+            box-shadow:
+                0 0 14px var(--green);
+        }
+
+        h1 {
+            font-size: clamp(
+                58px,
+                7.4vw,
+                138px
+            );
+
+            line-height: 0.94;
+            letter-spacing: -5px;
+            font-weight: 900;
+        }
+
+        h2 {
+            font-size: clamp(
+                44px,
+                5vw,
+                92px
+            );
+
+            line-height: 1;
+            letter-spacing: -3px;
+            font-weight: 900;
+        }
+
+        h3 {
+            font-size: 27px;
+        }
+
+        .gradientText {
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff 0%,
+                    #62ecff 35%,
+                    #9680ff 68%,
+                    #ffffff 100%
+                );
+
+            background-size: 250% auto;
+
+            color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+
+            animation: gradientText 7s linear infinite;
+        }
+
+        @keyframes gradientText {
+            to {
+                background-position: 250% center;
+            }
+        }
+
+        .lead {
+            margin-top: 28px;
+
+            color: var(--muted);
+
+            font-size: clamp(
+                19px,
+                1.5vw,
+                29px
+            );
+
+            line-height: 1.55;
+
+            max-width: 900px;
+        }
+
+        .center .lead {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* =========================================
+           REVEAL
+        ========================================= */
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(55px);
+
+            transition:
+                opacity 0.9s ease,
+                transform 0.9s cubic-bezier(.16,1,.3,1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay1 {
+            transition-delay: 0.1s;
+        }
+
+        .delay2 {
+            transition-delay: 0.2s;
+        }
+
+        .delay3 {
+            transition-delay: 0.3s;
+        }
+
+        .delay4 {
+            transition-delay: 0.4s;
+        }
+
+        /* =========================================
+           HERO
+        ========================================= */
+
+        .hero {
+            text-align: center;
+        }
+
+        .heroContent {
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero h1 {
+            max-width: 1250px;
+            margin: 0 auto;
+        }
+
+        .heroLead {
+            max-width: 980px;
+            margin:
+                30px
+                auto
+                0;
+        }
+
+        .heroWords {
+            margin-top: 45px;
+
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .heroWord {
+            padding: 11px 18px;
+
+            border-radius: 999px;
+
+            border:
+                1px solid rgba(255,255,255,0.12);
+
+            background:
+                rgba(255,255,255,0.045);
+
+            color: #c9d8eb;
+
+            font-size: 14px;
+
+            backdrop-filter: blur(12px);
+        }
+
+        .scrollHint {
+            position: absolute;
+
+            bottom: 34px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            color: #8192aa;
+
+            font-size: 12px;
+
+            letter-spacing: 2px;
+        }
+
+        .mouse {
+            margin:
+                0 auto
+                8px;
+
+            width: 24px;
+            height: 37px;
+
+            border:
+                1px solid rgba(255,255,255,0.28);
+
+            border-radius: 20px;
+
+            display: flex;
+            justify-content: center;
+        }
+
+        .mouse::before {
+            content: "";
+
+            width: 3px;
+            height: 7px;
+
+            margin-top: 7px;
+
+            border-radius: 10px;
+
+            background: var(--cyan);
+
+            animation: mouse 1.8s infinite;
+        }
+
+        @keyframes mouse {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+
+            30% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(13px);
+                opacity: 0;
+            }
+        }
+
+        /* =========================================
+           SPLIT
+        ========================================= */
+
+        .split {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.05fr)
+                minmax(420px, 0.95fr);
+
+            gap: 70px;
+
+            align-items: center;
+        }
+
+        /* =========================================
+           CODE EDITOR
+        ========================================= */
+
+        .codeEditor {
+            position: relative;
+
+            border:
+                1px solid rgba(255,255,255,0.12);
+
+            border-radius: 25px;
+
+            overflow: hidden;
+
+            background:
+                rgba(4, 10, 25, 0.76);
+
+            box-shadow: var(--shadow);
+
+            backdrop-filter: blur(25px);
+
+            transform:
+                perspective(1200px)
+                rotateY(-5deg)
+                rotateX(2deg);
+        }
+
+        .editorHeader {
+            height: 52px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding:
+                0
+                18px;
+
+            background:
+                rgba(255,255,255,0.035);
+
+            border-bottom:
+                1px solid rgba(255,255,255,0.08);
+        }
+
+        .editorDots {
+            display: flex;
+            gap: 7px;
+        }
+
+        .editorDot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .editorDot:nth-child(1) {
+            background: #ff5f57;
+        }
+
+        .editorDot:nth-child(2) {
+            background: #febc2e;
+        }
+
+        .editorDot:nth-child(3) {
+            background: #28c840;
+        }
+
+        .editorFile {
+            color: #778aa5;
+            font-size: 12px;
+        }
+
+        .editorBody {
+            padding: 34px;
+
+            font-family:
+                Consolas,
+                "Courier New",
+                monospace;
+
+            font-size: 17px;
+            line-height: 1.9;
+        }
+
+        .codeBlue {
+            color: #53d7ff;
+        }
+
+        .codePurple {
+            color: #c48aff;
+        }
+
+        .codeGreen {
+            color: #6effbb;
+        }
+
+        .codeYellow {
+            color: #ffd972;
+        }
+
+        .lineNumber {
+            display: inline-block;
+
+            width: 36px;
+
+            color: #40506a;
+
+            user-select: none;
+        }
+
+        /* =========================================
+           COURSE CARD
+        ========================================= */
+
+        .courseBadge {
+            display: inline-flex;
+
+            margin-top: 33px;
+
+            padding:
+                13px
+                20px;
+
+            border:
+                1px solid rgba(83,255,194,0.22);
+
+            border-radius: 999px;
+
+            color: var(--green);
+
+            background:
+                rgba(83,255,194,0.06);
+
+            font-weight: 700;
+        }
+
+        /* =========================================
+           FEATURE CARDS
+        ========================================= */
+
+        .cardGrid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 22px;
+
+            margin-top: 50px;
+        }
+
+        .card {
+            position: relative;
+
+            min-height: 270px;
+
+            padding: 32px;
+
+            border-radius: 24px;
+
+            border:
+                1px solid rgba(255,255,255,0.1);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,0.075),
+                    rgba(255,255,255,0.025)
+                );
+
+            backdrop-filter: blur(16px);
+
+            overflow: hidden;
+
+            transition:
+                transform 0.35s,
+                border-color 0.35s,
+                background 0.35s;
+        }
+
+        .card:hover {
+            transform: translateY(-9px);
+
+            border-color:
+                rgba(52,231,255,0.32);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(52,231,255,0.08),
+                    rgba(138,99,255,0.035)
+                );
+        }
+
+        .cardGlow {
+            position: absolute;
+
+            width: 180px;
+            height: 180px;
+
+            right: -80px;
+            top: -80px;
+
+            background: var(--cyan);
+
+            border-radius: 50%;
+
+            filter: blur(70px);
+
+            opacity: 0.13;
+        }
+
+        .iconBox {
+            width: 57px;
+            height: 57px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin-bottom: 28px;
+
+            border-radius: 17px;
+
+            background:
+                rgba(52,231,255,0.08);
+
+            border:
+                1px solid rgba(52,231,255,0.18);
+
+            color: var(--cyan);
+
+            font-size: 27px;
+        }
+
+        .card h3 {
+            margin-bottom: 13px;
+        }
+
+        .card p {
+            color: var(--muted);
+
+            font-size: 17px;
+            line-height: 1.55;
+        }
+
+        /* =========================================
+           CURRICULUM
+        ========================================= */
+
+        .curriculum {
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr;
+
+            gap: 30px;
+
+            margin-top: 52px;
+        }
+
+        .quarter {
+            position: relative;
+
+            min-height: 420px;
+
+            padding: 38px;
+
+            border-radius: 28px;
+
+            background:
+                rgba(7, 17, 35, 0.72);
+
+            border:
+                1px solid rgba(255,255,255,0.1);
+
+            overflow: hidden;
+        }
+
+        .quarter::before {
+            content: "";
+
+            position: absolute;
+
+            width: 260px;
+            height: 260px;
+
+            right: -130px;
+            top: -120px;
+
+            border-radius: 50%;
+
+            background: var(--purple);
+
+            filter: blur(100px);
+
+            opacity: 0.17;
+        }
+
+        .quarter:first-child::before {
+            background: var(--cyan);
+        }
+
+        .quarterNumber {
+            color: var(--cyan);
+
+            font-size: 13px;
+
+            letter-spacing: 2.5px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 17px;
+        }
+
+        .quarter h3 {
+            font-size: 34px;
+            margin-bottom: 27px;
+        }
+
+        .skillList {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .skill {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+
+            color: #c4d2e6;
+
+            line-height: 1.45;
+        }
+
+        .skillCheck {
+            min-width: 24px;
+            height: 24px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+                rgba(83,255,194,0.08);
+
+            color: var(--green);
+
+            font-size: 12px;
+        }
+
+        /* =========================================
+           TERMINAL
+        ========================================= */
+
+        .terminalWrap {
+            max-width: 1120px;
+            margin: 45px auto 0;
+        }
+
+        .terminal {
+            border:
+                1px solid rgba(83,255,194,0.16);
+
+            border-radius: 28px;
+
+            background:
+                rgba(2, 12, 16, 0.77);
+
+            box-shadow:
+                0 30px 120px rgba(0,0,0,0.45);
+
+            overflow: hidden;
+        }
+
+        .terminalHeader {
+            height: 55px;
+
+            padding:
+                0
+                20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            background:
+                rgba(255,255,255,0.025);
+
+            border-bottom:
+                1px solid rgba(255,255,255,0.06);
+        }
+
+        .terminalTitle {
+            color: #78958e;
+            font-size: 13px;
+        }
+
+        .terminalBody {
+            padding:
+                42px
+                45px;
+
+            font-family:
+                Consolas,
+                monospace;
+
+            font-size: clamp(
+                19px,
+                1.6vw,
+                28px
+            );
+
+            line-height: 1.9;
+        }
+
+        .termLine {
+            margin: 3px 0;
+        }
+
+        .prompt {
+            color: var(--green);
+        }
+
+        .cursor {
+            display: inline-block;
+
+            width: 10px;
+            height: 1em;
+
+            vertical-align: -2px;
+
+            background: var(--green);
+
+            animation: blink 0.85s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* =========================================
+           INFO SECTION
+        ========================================= */
+
+        .infoGrid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+
+            margin-top: 48px;
+        }
+
+        .infoCard {
+            padding: 27px;
+
+            min-height: 190px;
+
+            border-radius: 22px;
+
+            background:
+                rgba(255,255,255,0.045);
+
+            border:
+                1px solid rgba(255,255,255,0.09);
+
+            backdrop-filter: blur(15px);
+        }
+
+        .infoLabel {
+            color: var(--cyan);
+
+            font-size: 12px;
+
+            letter-spacing: 1.8px;
+
+            margin-bottom: 15px;
+
+            text-transform: uppercase;
+        }
+
+        .infoValue {
+            color: white;
+
+            font-size: 22px;
+            font-weight: 700;
+
+            line-height: 1.35;
+        }
+
+        .infoSmall {
+            margin-top: 10px;
+
+            color: var(--muted);
+
+            font-size: 15px;
+            line-height: 1.45;
+        }
+
+        /* =========================================
+           FREE BLOCK
+        ========================================= */
+
+        .free {
+            color: var(--green);
+
+            font-size:
+                clamp(
+                    80px,
+                    12vw,
+                    190px
+                );
+
+            font-weight: 1000;
+
+            line-height: 0.9;
+
+            letter-spacing: -8px;
+
+            text-shadow:
+                0 0 70px rgba(83,255,194,0.2);
+        }
+
+        /* =========================================
+           CTA
+        ========================================= */
+
+        .ctaSection {
+            text-align: center;
+        }
+
+        .ctaBox {
+            max-width: 1150px;
+
+            margin: 0 auto;
+
+            padding:
+                65px
+                50px;
+
+            border:
+                1px solid rgba(255,255,255,0.11);
+
+            border-radius: 38px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(12,31,58,0.72),
+                    rgba(15,11,38,0.72)
+                );
+
+            backdrop-filter: blur(25px);
+
+            box-shadow: var(--shadow);
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .ctaBox::before {
+            content: "";
+
+            position: absolute;
+
+            width: 500px;
+            height: 500px;
+
+            left: 50%;
+            bottom: -410px;
+
+            transform: translateX(-50%);
+
+            background: var(--cyan);
+
+            filter: blur(100px);
+
+            opacity: 0.18;
+        }
+
+        .ctaButtons {
+            position: relative;
+
+            margin-top: 38px;
+
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .whatsapp {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+
+            padding:
+                18px
+                32px;
+
+            border-radius: 999px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #20db7a,
+                    #53ffc2
+                );
+
+            color: #03120c;
+
+            text-decoration: none;
+
+            font-size: 18px;
+            font-weight: 800;
+
+            box-shadow:
+                0 0 40px rgba(83,255,194,0.25);
+
+            transition:
+                transform 0.3s,
+                box-shadow 0.3s;
+        }
+
+        .whatsapp:hover {
+            transform: translateY(-4px) scale(1.02);
+
+            box-shadow:
+                0 0 65px rgba(83,255,194,0.42);
+        }
+
+        .phoneButton {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding:
+                18px
+                32px;
+
+            border-radius: 999px;
+
+            border:
+                1px solid rgba(255,255,255,0.13);
+
+            color: white;
+
+            text-decoration: none;
+
+            background:
+                rgba(255,255,255,0.045);
+
+            font-size: 18px;
+            font-weight: 700;
+
+            transition: 0.3s;
+        }
+
+        .phoneButton:hover {
+            background:
+                rgba(255,255,255,0.09);
+
+            transform: translateY(-4px);
+        }
+
+        .teacher {
+            margin-top: 31px;
+
+            color: #a8b9cf;
+
+            font-size: 17px;
+        }
+
+        .teacher strong {
+            color: white;
+        }
+
+        /* =========================================
+           BOTTOM CONTROL
+        ========================================= */
+
+        .bottomControls {
+            position: fixed;
+
+            left: 50%;
+            bottom: 20px;
+
+            transform: translateX(-50%);
+
+            z-index: 1000;
+
+            display: flex;
+            gap: 8px;
+
+            padding: 7px;
+
+            border-radius: 999px;
+
+            background:
+                rgba(5, 12, 27, 0.65);
+
+            border:
+                1px solid rgba(255,255,255,0.09);
+
+            backdrop-filter: blur(20px);
+        }
+
+        .controlButton {
+            width: 40px;
+            height: 40px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.055);
+
+            color: white;
+
+            cursor: pointer;
+
+            font-size: 17px;
+
+            transition: 0.25s;
+        }
+
+        .controlButton:hover {
+            background:
+                rgba(52,231,255,0.12);
+
+            color: var(--cyan);
+        }
+
+        /* =========================================
+           SECTION COUNTER
+        ========================================= */
+
+        .sectionCounter {
+            position: fixed;
+
+            left: 30px;
+            bottom: 28px;
+
+            z-index: 1000;
+
+            font-family:
+                Consolas,
+                monospace;
+
+            color: #5f728e;
+
+            font-size: 13px;
+        }
+
+        .sectionCounter strong {
+            color: var(--cyan);
+        }
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 1000px) {
+
+            .topBar {
+                padding:
+                    0
+                    18px;
+            }
+
+            .brandText {
+                display: none;
+            }
+
+            .section {
+                padding:
+                    110px
+                    24px
+                    80px;
+            }
+
+            .split,
+            .curriculum {
+                grid-template-columns: 1fr;
+            }
+
+            .cardGrid {
+                grid-template-columns: 1fr;
+            }
+
+            .infoGrid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .codeEditor {
+                transform: none;
+            }
+
+            h1 {
+                letter-spacing: -3px;
+            }
+
+            .sideNav {
+                right: 13px;
+            }
+        }
+
+        @media (max-width: 620px) {
+
+.musicButton {
+    width: 42px;
+    padding-left: 0;
+    padding-right: 0;
+    gap: 0;
+}
+
+.musicButton .musicLabel {
+    display: none;
+}
+            .topButton:nth-child(1) {
+                display: none;
+            }
+
+            .infoGrid {
+                grid-template-columns: 1fr;
+            }
+
+            .ctaBox {
+                padding:
+                    45px
+                    22px;
+            }
+
+            .free {
+                letter-spacing: -4px;
+            }
+
+            .bottomControls {
+                bottom: 10px;
+            }
+
+            .sectionCounter {
+                display: none;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+<audio id="bgMusic" autoplay loop preload="auto" playsinline>
+    <source src="./misic.mp3" type="audio/mpeg">
+</audio>
+<div class="pageBackground">
+    <div class="grid"></div>
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="orb three"></div>
+</div>
+
+<canvas id="networkCanvas"></canvas>
+
+<div class="progressBar" id="progressBar"></div>
+
+
+<header class="topBar">
+
+    <div class="brand">
+
+        <img
+                src="logo.jpg"
+                alt="Мектеп логотиби"
+        >
+
+        <div class="brandText">
+            <strong>
+                №1 ЖАТАК МЕКТЕП ЛИЦЕЙИ
+            </strong>
+
+            <span>
+                IT ПРОГРАММАЛОО
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="topActions">
+
+        <button
+                class="topButton"
+                onclick="goToSection(6)"
+        >
+            Байланыш
+        </button>
+        <button
+                class="topButton musicButton"
+                id="musicButton"
+                onclick="toggleMusic()"
+                aria-label="Музыканы күйгүзүү же өчүрүү"
+                title="Музыканы күйгүзүү же өчүрүү"
+        >
+            <span class="musicIcon" id="musicIcon">♫</span>
+            <span class="musicLabel" id="musicLabel">Музыка</span>
+        </button>
+        <button
+                class="topButton"
+                onclick="toggleFullscreen()"
+        >
+            ⛶ Толук экран
+        </button>
+
+    </div>
+
+</header>
+
+
+<nav class="sideNav" id="sideNav"></nav>
+
+
+<div class="sectionCounter">
+
+    <strong id="currentNumber">
+        01
+    </strong>
+
+    /
+
+    <span id="totalNumber">
+        07
+    </span>
+
+</div>
+
+
+<div class="bottomControls">
+
+    <button
+            class="controlButton"
+            onclick="previousSection()"
+            title="Мурунку бөлүм"
+    >
+        ↑
+    </button>
+
+    <button
+            class="controlButton"
+            onclick="nextSection()"
+            title="Кийинки бөлүм"
+    >
+        ↓
+    </button>
+
+</div>
+
+
+<!-- =====================================
+     SECTION 1
+====================================== -->
+
+<section class="section hero">
+
+    <div class="container heroContent">
+
+        <div class="eyebrow reveal">
+
+            <span class="eyebrowDot"></span>
+
+            КЕЛЕЧЕК БҮГҮН БАШТАЛАТ
+
+        </div>
+
+
+        <h1
+                class="
+                gradientText
+                reveal
+                delay1
+            "
+        >
+            IT БҮГҮН
+            <br>
+            АР БИР ТАРМАКТА
+        </h1>
+
+
+        <p
+                class="
+                lead
+                heroLead
+                reveal
+                delay2
+            "
+        >
+            Бүгүн дээрлик бардык кесиптерде
+            компьютердик технологиялар колдонулат.
+            Программалоону билүү бул жөн гана код жазуу эмес.
+            Бул логикалык ой жүгүртүү,
+            жаңы идеяларды жаратуу
+            жана келечектин мүмкүнчүлүктөрүнө даяр болуу.
+        </p>
+
+
+        <div
+                class="
+                heroWords
+                reveal
+                delay3
+            "
+        >
+
+            <div class="heroWord">
+                ПРОГРАММАЛОО
+            </div>
+
+            <div class="heroWord">
+                ВЕБ ТЕХНОЛОГИЯ
+            </div>
+
+            <div class="heroWord">
+                ДИЗАЙН
+            </div>
+
+            <div class="heroWord">
+                ЛОГИКА
+            </div>
+
+            <div class="heroWord">
+                КЕЛЕЧЕК
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="scrollHint">
+
+        <div class="mouse"></div>
+
+        ТӨМӨН ЖЫЛДЫР
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SECTION 2
+====================================== -->
+
+<section class="section">
+
+    <div class="container split">
+
+        <div>
+
+            <div class="eyebrow reveal">
+
+                <span class="eyebrowDot"></span>
+
+                ЖАҢЫ МҮМКҮНЧҮЛҮК
+
+            </div>
+
+
+            <h2
+                    class="
+                    gradientText
+                    reveal
+                    delay1
+                "
+            >
+                IT
+                <br>
+                ПРОГРАММАЛОО
+            </h2>
+
+
+            <p
+                    class="
+                    lead
+                    reveal
+                    delay2
+                "
+            >
+                8, 9, 10 жана 11 класстын
+                окуучулары үчүн практикалык курс.
+                Нөлдөн баштап код жазууну,
+                веб сайт түзүүнү
+                жана программалоонун негиздерин үйрөн.
+            </p>
+
+
+            <div
+                    class="
+                    courseBadge
+                    reveal
+                    delay3
+                "
+            >
+                ОКУУЧУЛАР ҮЧҮН БЕКЕР
+            </div>
+
+        </div>
+
+
+        <div
+                class="
+                codeEditor
+                reveal
+                delay2
+            "
+        >
+
+            <div class="editorHeader">
+
+                <div class="editorDots">
+                    <span class="editorDot"></span>
+                    <span class="editorDot"></span>
+                    <span class="editorDot"></span>
+                </div>
+
+                <div class="editorFile">
+                    future.js
+                </div>
+
+            </div>
+
+
+            <div class="editorBody">
+
+                <div>
+                    <span class="lineNumber">1</span>
+                    <span class="codePurple">
+                        const
+                    </span>
+
+                    <span class="codeBlue">
+                        student
+                    </span>
+
+                    =
+                    <span class="codeGreen">
+                        "СЕН"
+                    </span>;
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">2</span>
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">3</span>
+
+                    <span class="codePurple">
+                        function
+                    </span>
+
+                    <span class="codeBlue">
+                        buildFuture
+                    </span>() {
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">4</span>
+
+                    &nbsp;&nbsp;
+
+                    <span class="codeBlue">
+                        learn
+                    </span>(
+                    <span class="codeGreen">
+                        "HTML"
+                    </span>);
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">5</span>
+
+                    &nbsp;&nbsp;
+
+                    <span class="codeBlue">
+                        learn
+                    </span>(
+                    <span class="codeGreen">
+                        "CSS"
+                    </span>);
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">6</span>
+
+                    &nbsp;&nbsp;
+
+                    <span class="codeBlue">
+                        learn
+                    </span>(
+                    <span class="codeGreen">
+                        "JavaScript"
+                    </span>);
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">7</span>
+
+                    &nbsp;&nbsp;
+
+                    <span class="codeBlue">
+                        learn
+                    </span>(
+                    <span class="codeGreen">
+                        "Java"
+                    </span>);
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">8</span>
+
+                    &nbsp;&nbsp;
+
+                    <span class="codePurple">
+                        return
+                    </span>
+
+                    <span class="codeYellow">
+                        FUTURE
+                    </span>;
+                </div>
+
+
+                <div>
+                    <span class="lineNumber">9</span>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SECTION 3
+====================================== -->
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="eyebrow reveal">
+
+            <span class="eyebrowDot"></span>
+
+            ЭМНЕ ҮЙРӨНӨСҮҢ?
+
+        </div>
+
+
+        <h2
+                class="
+                gradientText
+                reveal
+                delay1
+            "
+        >
+            ИДЕЯДАН
+            <br>
+            ДАЯР ДОЛБООРГО
+        </h2>
+
+
+        <div class="cardGrid">
+
+            <div
+                    class="
+                    card
+                    reveal
+                    delay1
+                "
+            >
+
+                <div class="cardGlow"></div>
+
+                <div class="iconBox">
+                    &lt;/&gt;
+                </div>
+
+                <h3>
+                    Код жазуу
+                </h3>
+
+                <p>
+                    Программалоонун логикасын,
+                    коддун түзүлүшүн
+                    жана алгоритмдердин негиздерин
+                    түшүнөсүң.
+                </p>
+
+            </div>
+
+
+            <div
+                    class="
+                    card
+                    reveal
+                    delay2
+                "
+            >
+
+                <div class="cardGlow"></div>
+
+                <div class="iconBox">
+                    ◉
+                </div>
+
+                <h3>
+                    Веб сайт түзүү
+                </h3>
+
+                <p>
+                    HTML,
+                    CSS
+                    жана JavaScript
+                    аркылуу заманбап
+                    жана интерактивдүү
+                    веб сайттарды жасайсың.
+                </p>
+
+            </div>
+
+
+            <div
+                    class="
+                    card
+                    reveal
+                    delay3
+                "
+            >
+
+                <div class="cardGlow"></div>
+
+                <div class="iconBox">
+                    ✦
+                </div>
+
+                <h3>
+                    Дизайн
+                </h3>
+
+                <p>
+                    Сайттын көрүнүшүн,
+                    түстөрдү,
+                    блокторду
+                    жана колдонуучуга ыңгайлуу
+                    интерфейсти түзүүнү үйрөнөсүң.
+                </p>
+
+            </div>
+
+
+            <div
+                    class="
+                    card
+                    reveal
+                    delay1
+                "
+            >
+
+                <div class="cardGlow"></div>
+
+                <div class="iconBox">
+                    {}
+                </div>
+
+                <h3>
+                    JavaScript
+                </h3>
+
+                <p>
+                    Баскычтар,
+                    анимациялар,
+                    логика
+                    жана сайттын интерактивдүү
+                    функциялары менен иштейсиң.
+                </p>
+
+            </div>
+
+
+            <div
+                    class="
+                    card
+                    reveal
+                    delay2
+                "
+            >
+
+                <div class="cardGlow"></div>
+
+                <div class="iconBox">
+                    J
+                </div>
+
+                <h3>
+                    Java
+                </h3>
+
+                <p>
+                    Backend багытына киришип,
+                    Java тилинин базалык
+                    түшүнүктөрүн үйрөнө баштайсың.
+                </p>
+
+            </div>
+
+
+            <div
+                    class="
+                    card
+                    reveal
+                    delay3
+                "
+            >
+
+                <div class="cardGlow"></div>
+
+                <div class="iconBox">
+                    🚀
+                </div>
+
+                <h3>
+                    Өз долбооруң
+                </h3>
+
+                <p>
+                    Үйрөнгөн билимиңди колдонуп,
+                    идеяңды иштеген
+                    санариптик долбоорго
+                    айлантасың.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SECTION 4
+====================================== -->
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="center">
+
+            <div class="eyebrow reveal">
+
+                <span class="eyebrowDot"></span>
+
+                ОКУУ ПРОГРАММАСЫ
+
+            </div>
+
+
+            <h2
+                    class="
+                    gradientText
+                    reveal
+                    delay1
+                "
+            >
+                БИР ОКУУ ЖЫЛЫ
+                <br>
+                ЭКИ БАГЫТ
+            </h2>
+
+        </div>
+
+
+        <div class="curriculum">
+
+            <div
+                    class="
+                    quarter
+                    reveal
+                    delay2
+                "
+            >
+
+                <div class="quarterNumber">
+                    1 ЖАНА 2 ЧЕЙРЕК
+                </div>
+
+
+                <h3>
+                    FRONTEND
+                </h3>
+
+
+                <div class="skillList">
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        HTML аркылуу
+                        веб баракчанын түзүлүшүн жазуу
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        CSS аркылуу
+                        сайтты кооздоо
+                        жана дизайн түзүү
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        JavaScript аркылуу
+                        сайтка функцияларды кошуу
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Адаптивдүү
+                        веб сайттарды түзүү
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Интерфейс
+                        жана веб дизайн негиздери
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Өзүнүн биринчи
+                        толук веб долбоорун түзүү
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    class="
+                    quarter
+                    reveal
+                    delay3
+                "
+            >
+
+                <div class="quarterNumber">
+                    3 ЖАНА 4 ЧЕЙРЕК
+                </div>
+
+
+                <h3>
+                    BACKEND ЖАНА JAVA
+                </h3>
+
+
+                <div class="skillList">
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Backend деген эмне
+                        жана ал кандай иштейт
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Java программалоо
+                        тилине киришүү
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Өзгөрмөлөр
+                        жана маалымат түрлөрү
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Шарттар
+                        жана циклдер
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Функциялар
+                        жана программалык логика
+
+                    </div>
+
+
+                    <div class="skill">
+
+                        <span class="skillCheck">
+                            ✓
+                        </span>
+
+                        Жөнөкөй программаларды
+                        өз алдынча түзүү
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SECTION 5
+====================================== -->
+
+<section class="section">
+
+    <div class="container center">
+
+        <div class="eyebrow reveal">
+
+            <span class="eyebrowDot"></span>
+
+            ЭМНЕ ҮЧҮН IT?
+
+        </div>
+
+
+        <h2
+                class="
+                gradientText
+                reveal
+                delay1
+            "
+        >
+            СЕН КОДДУ ГАНА ЭМЕС
+            <br>
+            ОЙ ЖҮГҮРТҮҮНҮ ҮЙРӨНӨСҮҢ
+        </h2>
+
+
+        <div
+                class="
+                terminalWrap
+                reveal
+                delay2
+            "
+        >
+
+            <div class="terminal">
+
+                <div class="terminalHeader">
+
+                    <div class="editorDots">
+
+                        <span class="editorDot"></span>
+                        <span class="editorDot"></span>
+                        <span class="editorDot"></span>
+
+                    </div>
+
+                    <div class="terminalTitle">
+                        student@future
+                    </div>
+
+                </div>
+
+
+                <div class="terminalBody">
+
+                    <div class="termLine">
+                        <span class="prompt">
+                            >
+                        </span>
+
+                        Логикалык ой жүгүртүү
+                    </div>
+
+
+                    <div class="termLine">
+                        <span class="prompt">
+                            >
+                        </span>
+
+                        Маселени чечүү жөндөмү
+                    </div>
+
+
+                    <div class="termLine">
+                        <span class="prompt">
+                            >
+                        </span>
+
+                        Чыгармачылык
+                        жана технология
+                    </div>
+
+
+                    <div class="termLine">
+                        <span class="prompt">
+                            >
+                        </span>
+
+                        Өз алдынча долбоор түзүү
+                    </div>
+
+
+                    <div class="termLine">
+                        <span class="prompt">
+                            >
+                        </span>
+
+                        Келечектеги кесиптерге даярдык
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="termLine">
+
+                        STATUS:
+
+                        <span class="codeGreen">
+                            FUTURE READY
+                        </span>
+
+                        <span class="cursor"></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SECTION 6
+====================================== -->
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="center">
+
+            <div class="eyebrow reveal">
+
+                <span class="eyebrowDot"></span>
+
+                САБАКТАР ЖӨНҮНДӨ
+
+            </div>
+
+
+            <h2
+                    class="
+                    gradientText
+                    reveal
+                    delay1
+                "
+            >
+                КАЧАН ЖАНА КАЙДА?
+            </h2>
+
+        </div>
+
+
+        <div class="infoGrid">
+
+            <div
+                    class="
+                    infoCard
+                    reveal
+                    delay1
+                "
+            >
+
+                <div class="infoLabel">
+                    КЛАССТАР
+                </div>
+
+                <div class="infoValue">
+                    8, 9, 10, 11
+                </div>
+
+                <div class="infoSmall">
+                    Жогорку класстын
+                    окуучулары үчүн
+                </div>
+
+            </div>
+
+
+            <div
+                    class="
+                    infoCard
+                    reveal
+                    delay2
+                "
+            >
+
+                <div class="infoLabel">
+                    КҮНДӨР
+                </div>
+
+                <div class="infoValue">
+                    Дүйшөмбү
+                    <br>
+                    Шаршемби
+                    <br>
+                    Бейшемби
+                </div>
+
+            </div>
+
+
+            <div
+                    class="
+                    infoCard
+                    reveal
+                    delay3
+                "
+            >
+
+                <div class="infoLabel">
+                    УБАКТЫСЫ
+                </div>
+
+                <div class="infoValue">
+                    15:00
+                    <br>
+                    17:00
+                </div>
+
+                <div class="infoSmall">
+                    Сабактар окуу жылынын
+                    аягына чейин өтөт
+                </div>
+
+            </div>
+
+
+            <div
+                    class="
+                    infoCard
+                    reveal
+                    delay4
+                "
+            >
+
+                <div class="infoLabel">
+                    КАБИНЕТ
+                </div>
+
+                <div class="infoValue">
+                    №313
+                </div>
+
+                <div class="infoSmall">
+                    3 кабат
+                    <br>
+                    Информатика кабинети
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+                class="
+                center
+                reveal
+                delay2
+            "
+                style="margin-top: 60px;"
+        >
+
+            <div class="free">
+                БЕКЕР
+            </div>
+
+            <p
+                    class="lead"
+                    style="
+                    margin-left: auto;
+                    margin-right: auto;
+                "
+            >
+                IT дүйнөсүнө биринчи кадамыңды
+                бүгүн башта.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SECTION 7
+====================================== -->
+
+<section class="section ctaSection">
+
+    <div class="container">
+
+        <div
+                class="
+                ctaBox
+                reveal
+            "
+        >
+
+            <div class="eyebrow">
+
+                <span class="eyebrowDot"></span>
+
+                КАТТАЛУУ АЧЫК
+
+            </div>
+
+
+            <h2 class="gradientText">
+                КЕЛЕЧЕГИҢДИ
+                <br>
+                КОД МЕНЕН ТҮЗ
+            </h2>
+
+
+            <p
+                    class="lead"
+                    style="
+                    margin-left: auto;
+                    margin-right: auto;
+                "
+            >
+                Бишкек шаарындагы
+                Абдылда Каниметов атындагы
+                №1 жалпы орто билим берүүчү
+                жатак мектеп лицейинин
+                IT Программалоо ийримине каттал.
+            </p>
+
+
+            <div class="ctaButtons">
+
+                <a
+                        class="whatsapp"
+                        href="https://wa.me/996775301006?text=Саламатсызбы%2C%20IT%20Программалоо%20курсуна%20катталгым%20келет."
+                        target="_blank"
+                >
+                    WhatsApp аркылуу каттал
+                </a>
+
+
+                <a
+                        class="phoneButton"
+                        href="tel:+996775301006"
+                >
+                    +996 775 301 006
+                </a>
+
+            </div>
+
+
+            <div class="teacher">
+
+                Ийрим жетекчиси:
+                <strong>
+                    Сулайманов У. Б.
+                </strong>
+
+                <br><br>
+
+                Бишкек шаары,
+                Биринчи май району,
+                Жибек Жолу проспекти,
+                625
+
+                <br>
+
+                3 кабат,
+                №313 информатика кабинети
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script>
+
+    /* =========================================
+       SECTIONS
+    ========================================= */
+
+    const sections =
+        [...document.querySelectorAll(".section")];
+
+    const sideNav =
+        document.getElementById("sideNav");
+
+    const currentNumber =
+        document.getElementById("currentNumber");
+
+    const totalNumber =
+        document.getElementById("totalNumber");
+
+    const progressBar =
+        document.getElementById("progressBar");
+
+    let currentSection = 0;
+
+    let wheelLocked = false;
+
+
+    /* =========================================
+       CREATE NAVIGATION DOTS
+    ========================================= */
+
+    totalNumber.textContent =
+        String(sections.length)
+            .padStart(2, "0");
+
+
+    sections.forEach((section, index) => {
+
+        const dot =
+            document.createElement("button");
+
+        dot.className = "navDot";
+
+        dot.setAttribute(
+            "aria-label",
+            "Бөлүм " + (index + 1)
+        );
+
+        dot.addEventListener(
+            "click",
+            () => goToSection(index)
+        );
+
+        sideNav.appendChild(dot);
+
+    });
+
+
+    const navDots =
+        [...document.querySelectorAll(".navDot")];
+
+
+    /* =========================================
+       GO TO SECTION
+    ========================================= */
+
+    function goToSection(index) {
+
+        if (index < 0) {
+            index = 0;
+        }
+
+        if (index >= sections.length) {
+            index = sections.length - 1;
+        }
+
+        currentSection = index;
+
+        sections[index].scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+        updateNavigation();
+
+    }
+
+
+    /* =========================================
+       NEXT
+    ========================================= */
+
+    function nextSection() {
+
+        if (
+            currentSection <
+            sections.length - 1
+        ) {
+
+            goToSection(
+                currentSection + 1
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       PREVIOUS
+    ========================================= */
+
+    function previousSection() {
+
+        if (currentSection > 0) {
+
+            goToSection(
+                currentSection - 1
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       NAVIGATION STATE
+    ========================================= */
+
+    function updateNavigation() {
+
+        navDots.forEach(
+            (dot, index) => {
+
+                dot.classList.toggle(
+                    "active",
+                    index === currentSection
+                );
+
+            }
+        );
+
+        currentNumber.textContent =
+            String(currentSection + 1)
+                .padStart(2, "0");
+
+    }
+
+
+    /* =========================================
+       OBSERVER
+    ========================================= */
+
+    const sectionObserver =
+        new IntersectionObserver(
+
+            entries => {
+
+                entries.forEach(entry => {
+
+                    if (
+                        entry.isIntersecting &&
+                        entry.intersectionRatio > 0.55
+                    ) {
+
+                        const index =
+                            sections.indexOf(
+                                entry.target
+                            );
+
+                        if (index >= 0) {
+
+                            currentSection = index;
+
+                            updateNavigation();
+
+                        }
+
+                    }
+
+                });
+
+            },
+
+            {
+                threshold: [
+                    0.55,
+                    0.7,
+                    0.85
+                ]
+            }
+
+        );
+
+
+    sections.forEach(section => {
+
+        sectionObserver.observe(section);
+
+    });
+
+
+    /* =========================================
+       REVEAL OBSERVER
+    ========================================= */
+
+    const revealObserver =
+        new IntersectionObserver(
+
+            entries => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target
+                            .classList
+                            .add("visible");
+
+                    }
+
+                });
+
+            },
+
+            {
+                threshold: 0.14
+            }
+
+        );
+
+
+    document
+        .querySelectorAll(".reveal")
+        .forEach(element => {
+
+            revealObserver.observe(element);
+
+        });
+
+
+    /* =========================================
+       KEYBOARD
+    ========================================= */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "ArrowDown" ||
+                event.key === "PageDown"
+            ) {
+
+                event.preventDefault();
+
+                nextSection();
+
+            }
+
+
+            if (
+                event.key === "ArrowUp" ||
+                event.key === "PageUp"
+            ) {
+
+                event.preventDefault();
+
+                previousSection();
+
+            }
+
+
+            if (event.key === "Home") {
+
+                event.preventDefault();
+
+                goToSection(0);
+
+            }
+
+
+            if (event.key === "End") {
+
+                event.preventDefault();
+
+                goToSection(
+                    sections.length - 1
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =========================================
+       SMOOTH MOUSE WHEEL SECTION CONTROL
+    ========================================= */
+
+    window.addEventListener(
+        "wheel",
+        event => {
+
+            if (wheelLocked) {
+                return;
+            }
+
+            if (
+                Math.abs(event.deltaY) < 30
+            ) {
+                return;
+            }
+
+            wheelLocked = true;
+
+
+            if (event.deltaY > 0) {
+
+                nextSection();
+
+            } else {
+
+                previousSection();
+
+            }
+
+
+            setTimeout(
+                () => {
+
+                    wheelLocked = false;
+
+                },
+                800
+            );
+
+        },
+
+        {
+            passive: true
+        }
+    );
+
+
+    /* =========================================
+       PROGRESS
+    ========================================= */
+
+    window.addEventListener(
+        "scroll",
+        () => {
+
+            const scrollTop =
+                window.scrollY;
+
+            const pageHeight =
+                document.documentElement
+                    .scrollHeight
+                -
+                window.innerHeight;
+
+            const percent =
+                pageHeight > 0
+                ?
+                scrollTop / pageHeight * 100
+                :
+                0;
+
+            progressBar.style.width =
+                percent + "%";
+
+        }
+    );
+
+
+    /* =========================================
+       FULLSCREEN
+    ========================================= */
+
+    function toggleFullscreen() {
+
+        if (!document.fullscreenElement) {
+
+            document
+                .documentElement
+                .requestFullscreen();
+
+        } else {
+
+            document.exitFullscreen();
+
+        }
+
+    }
+
+
+
+    /* =========================================
+       PARTICLE NETWORK
+    ========================================= */
+
+    const canvas =
+        document.getElementById(
+            "networkCanvas"
+        );
+
+    const ctx =
+        canvas.getContext("2d");
+
+    let width;
+    let height;
+
+    let particles = [];
+
+
+    /* =========================================
+       RESIZE
+    ========================================= */
+
+    function resizeCanvas() {
+
+        const ratio =
+            window.devicePixelRatio || 1;
+
+        width =
+            window.innerWidth;
+
+        height =
+            window.innerHeight;
+
+        canvas.width =
+            width * ratio;
+
+        canvas.height =
+            height * ratio;
+
+        canvas.style.width =
+            width + "px";
+
+        canvas.style.height =
+            height + "px";
+
+        ctx.setTransform(
+            ratio,
+            0,
+            0,
+            ratio,
+            0,
+            0
+        );
+
+
+        createParticles();
+
+    }
+
+
+    /* =========================================
+       CREATE PARTICLES
+    ========================================= */
+
+    function createParticles() {
+
+        particles = [];
+
+        let count =
+            Math.floor(
+                width / 24
+            );
+
+        count =
+            Math.min(
+                85,
+                Math.max(
+                    35,
+                    count
+                )
+            );
+
+
+        for (
+            let i = 0;
+            i < count;
+            i++
+        ) {
+
+            particles.push({
+
+                x:
+                    Math.random()
+                    *
+                    width,
+
+                y:
+                    Math.random()
+                    *
+                    height,
+
+                vx:
+                    (
+                        Math.random()
+                        -
+                        0.5
+                    )
+                    *
+                    0.28,
+
+                vy:
+                    (
+                        Math.random()
+                        -
+                        0.5
+                    )
+                    *
+                    0.28,
+
+                radius:
+                    0.8
+                    +
+                    Math.random()
+                    *
+                    1.7
+
+            });
+
+        }
+
+    }
+
+
+    /* =========================================
+       DRAW NETWORK
+    ========================================= */
+
+    function drawNetwork() {
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        for (
+            let i = 0;
+            i < particles.length;
+            i++
+        ) {
+
+            const p =
+                particles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+
+            if (
+                p.x < 0 ||
+                p.x > width
+            ) {
+
+                p.vx *= -1;
+
+            }
+
+
+            if (
+                p.y < 0 ||
+                p.y > height
+            ) {
+
+                p.vy *= -1;
+
+            }
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "rgba(95,225,255,0.48)";
+
+            ctx.fill();
+
+
+            for (
+                let j = i + 1;
+                j < particles.length;
+                j++
+            ) {
+
+                const p2 =
+                    particles[j];
+
+                const dx =
+                    p.x - p2.x;
+
+                const dy =
+                    p.y - p2.y;
+
+                const distance =
+                    Math.sqrt(
+                        dx * dx
+                        +
+                        dy * dy
+                    );
+
+
+                if (distance < 125) {
+
+                    const alpha =
+                        (
+                            1
+                            -
+                            distance / 125
+                        )
+                        *
+                        0.13;
+
+
+                    ctx.beginPath();
+
+                    ctx.moveTo(
+                        p.x,
+                        p.y
+                    );
+
+                    ctx.lineTo(
+                        p2.x,
+                        p2.y
+                    );
+
+                    ctx.strokeStyle =
+                        "rgba(70,200,255,"
+                        +
+                        alpha
+                        +
+                        ")";
+
+                    ctx.lineWidth =
+                        1;
+
+                    ctx.stroke();
+
+                }
+
+            }
+
+        }
+
+
+        requestAnimationFrame(
+            drawNetwork
+        );
+
+    }
+
+
+    /* =========================================
+       INITIALIZATION
+    ========================================= */
+
+    window.addEventListener(
+        "resize",
+        resizeCanvas
+    );
+
+    resizeCanvas();
+
+    drawNetwork();
+
+    updateNavigation();
+
+    /* =========================================
+       MP3 BACKGROUND MUSIC
+    ========================================= */
+
+    const bgMusic =
+        document.getElementById("bgMusic");
+
+    const musicButton =
+        document.getElementById("musicButton");
+
+    const musicIcon =
+        document.getElementById("musicIcon");
+
+    const musicLabel =
+        document.getElementById("musicLabel");
+
+    let musicWanted = true;
+
+    bgMusic.volume = 0.35;
+
+
+    function updateMusicUi(isPlaying) {
+
+        musicButton.classList.toggle(
+            "musicOn",
+            isPlaying
+        );
+
+        musicIcon.textContent =
+            isPlaying ? "♫" : "♪";
+
+        musicLabel.textContent =
+            isPlaying ? "Үн өчүрүү" : "Музыка";
+
+        musicButton.setAttribute(
+            "aria-pressed",
+            isPlaying ? "true" : "false"
+        );
+
+    }
+
+
+    async function tryStartMusic() {
+
+        if (!musicWanted) {
+            return;
+        }
+
+        try {
+
+            await bgMusic.play();
+            updateMusicUi(true);
+
+        } catch (error) {
+
+            /*
+               Chrome, Safari and mobile browsers may block
+               audible autoplay until the first user interaction.
+            */
+            updateMusicUi(false);
+
+        }
+
+    }
+
+
+    async function toggleMusic() {
+
+        if (bgMusic.paused) {
+
+            musicWanted = true;
+            await tryStartMusic();
+
+        } else {
+
+            musicWanted = false;
+            bgMusic.pause();
+            updateMusicUi(false);
+
+        }
+
+    }
+
+
+    /* Try to start immediately when the page opens. */
+    window.addEventListener(
+        "load",
+        tryStartMusic
+    );
+
+
+    /*
+       If autoplay is blocked, start automatically on the
+       first tap, click or key press anywhere on the page.
+    */
+    document.addEventListener(
+        "pointerdown",
+        () => {
+            if (musicWanted && bgMusic.paused) {
+                tryStartMusic();
+            }
+        },
+        { once: true, capture: true }
+    );
+
+    document.addEventListener(
+        "keydown",
+        () => {
+            if (musicWanted && bgMusic.paused) {
+                tryStartMusic();
+            }
+        },
+        { once: true }
+    );
+
+    bgMusic.addEventListener(
+        "play",
+        () => updateMusicUi(true)
+    );
+
+    bgMusic.addEventListener(
+        "pause",
+        () => updateMusicUi(false)
+    );
+
+    updateMusicUi(false);
+</script>
+
+</body>
+</html>
